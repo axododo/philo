@@ -1,4 +1,5 @@
 #include "philo.h"
+#include <pthread.h>
 
 int check_args(char **av) {
   int i;
@@ -12,6 +13,7 @@ int check_args(char **av) {
         return (1);
       i++;
     }
+    i = 0;
     y++;
   }
   return (0);
@@ -24,7 +26,7 @@ int procs_args(char **av, t_data *da) {
   da->time_sleep = ft_atoi(av[4]);
   if (av[5])
     da->nb_goal = ft_atoi(av[5]);
-  da->ph = malloc(sizeof(da->ph) * da->nb_philo);
+  da->ph = malloc(sizeof(t_philo) * da->nb_philo);
   if (!da->ph)
     return (1);
   return (0);
@@ -41,10 +43,46 @@ int init_args(int ac, char **av, t_data *da) {
   return (0);
 }
 
+void init_philo(t_data *da) {
+  int i;
+
+  i = 0;
+
+  while (i <= da->nb_philo) {
+    da->ph[i].nb_meals = 0;
+    da->ph[i].id = i;
+    da->ph[i].rip = 0;
+    da->ph[i].last_meals = 0;
+  }
+  return;
+}
+
+void *phi_loop(void *philo) {
+  t_philo *ph;
+  ph = philo;
+  printf("je dort %i", ph->id);
+  usleep(500);
+  printf("je pense %i", ph->id);
+  usleep(500);
+
+  return (0);
+}
+
+int summon_philo(void *da) {
+  int i;
+  t_philo *ph;
+
+  ph = daph;
+  i = 0;
+  while (i <= da->nb_philo)
+    pthread_create(&ph[i++].stone, NULL, &phi_loop, ph[i]);
+}
+
 int main(int ac, char **av) {
   t_data da;
   if (init_args(ac, av, &da))
     return (1);
-  // main loop
+  init_philo(&da);
+  summon_philo(&da);
   // clean
 }

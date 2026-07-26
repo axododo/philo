@@ -1,7 +1,10 @@
 #ifndef PHILO_H
 #define PHILO_H
 
+#include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef struct s_data {
   int nb_philo;
@@ -13,9 +16,11 @@ typedef struct s_data {
 } t_data;
 
 typedef struct s_philo {
-  // id
+  int id;
   int nb_meals;
   int last_meals; // time last
+  int rip;
+  pthread_t stone;
   struct s_data *da;
 } t_philo;
 
