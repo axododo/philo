@@ -12,6 +12,7 @@ typedef struct s_data {
   int time_eat;
   int time_sleep;
   int nb_goal;
+  pthread_mutex_t *forks;
   struct s_philo *ph;
 } t_data;
 
@@ -20,6 +21,8 @@ typedef struct s_philo {
   int nb_meals;
   int last_meals; // time last
   int rip;
+  int rFork;
+  int lFork;
   pthread_t stone;
   struct s_data *da;
 } t_philo;

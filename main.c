@@ -1,4 +1,5 @@
 #include "philo.h"
+#include <bits/pthreadtypes.h>
 #include <pthread.h>
 #include <stdlib.h>
 
@@ -27,8 +28,8 @@ int procs_args(char **av, t_data *da) {
   da->time_sleep = ft_atoi(av[4]);
   if (av[5])
     da->nb_goal = ft_atoi(av[5]);
-  da->ph = calloc(da->nb_philo + 1,sizeof(t_philo));
-  da->ph->stone = calloc(da->nb_philo + 1, sizeof(pthread_t));
+  da->ph = calloc(da->nb_philo + 1, sizeof(t_philo));
+  da->forks = calloc(da->nb_philo + 1, sizeof(pthread_mutex_t));
   if (!da->ph)
     return (1);
   return (0);
@@ -55,19 +56,38 @@ void init_philo(t_data *da) {
     da->ph[i].id = i;
     da->ph[i].rip = 0;
     da->ph[i].last_meals = 0;
+    da->ph[i].rFork = i;
+    da->ph[i].lFork = (i + 1) % da->nb_philo;
+    da->ph[i].da = da;
     i++;
   }
   return;
 }
 
+int eating(t_philo *ph) {
+  pthread_mutex_lock(&ph->da->forks[ph->lFork]);
+  printf("%i has taken a fork\n", ph->id);
+  pthread_mutex_lock(&ph->da->forks[ph->rFork]);
+  printf("%i has taken a fork\n", ph->id);
+  printf("%i is eating\n", ph->id);
+  usleep(ph->da->time_eat);
+
+  pthread_mutex_unlock(&ph->da->forks[ph->rFork]);
+  pthread_mutex_unlock(&ph->da->forks[ph->lFork]);
+  return (0);
+}
+
 void *phi_loop(void *philo) {
   t_philo *ph;
   ph = philo;
-  printf("je dort %i\n", ph->id);
-  usleep(500);
-  printf("je pense %i\n", ph->id);
-  usleep(500);
 
+  while (1) {
+    eating(ph);
+    printf("%i is sleeping\n", ph->id);
+    usleep(ph->da->time_sleep);
+    printf("%i is thinking\n", ph->id);
+    usleep(3);
+  }
   return (0);
 }
 
@@ -75,14 +95,12 @@ int summon_philo(t_philo *ph, t_data *da) {
   int i;
 
   i = 0;
-  
   while (i < da->nb_philo) {
     pthread_create(&ph[i].stone, NULL, &phi_loop, &ph[i]);
     i++;
   }
-
   i = 0;
-  while(i < da->nb_philo) {
+  while (i < da->nb_philo) {
     pthread_join(ph[i].stone, NULL);
     i++;
   }
@@ -94,10 +112,10 @@ int main(int ac, char **av) {
   t_philo *ph;
 
   if (init_args(ac, av, &da))
-  return (1);
-init_philo(&da);
-ph = da.ph;
+    return (1);
+  init_philo(&da);
+  ph = da.ph;
   summon_philo(ph, &da);
   // clean
-  return(0);
+  return (0);
 }
