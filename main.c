@@ -42,15 +42,17 @@ int procs_args(char **av, t_data *da) {
   da->time_sleep = ft_atoi(av[4]) * 1000;
   if (av[5])
     da->nb_goal = ft_atoi(av[5]);
+  else
+    da->nb_goal = -1;
   da->ph = calloc(da->nb_philo + 2, sizeof(t_philo));
   da->forks = calloc(da->nb_philo + 2, sizeof(pthread_mutex_t));
-  da->print = calloc(1, sizeof(pthread_mutex_t));
+  // da->print = calloc(1, sizeof(pthread_mutex_t));
   int i = 0;
   while (i < da->nb_philo + 1) {
     pthread_mutex_init(&da->forks[i], NULL);
     i++;
   }
-  pthread_mutex_init(da->print, NULL);
+  pthread_mutex_init(&da->print, NULL);
   if (!da->ph)
     return (1);
   return (0);
@@ -89,9 +91,9 @@ void init_philo(t_data *da) {
 }
 
 int mprint(t_philo *ph, int mod) {
-  if (ph->rip == 1)
+  if (ph->rip == 1 && mod != 5)
     return (0);
-  pthread_mutex_lock(ph->da->print);
+  pthread_mutex_lock(&ph->da->print);
   if (mod == 1)
     printf("%li %i has taken a fork\n", get_time(ph->da->start), ph->id);
   else if (mod == 2)
@@ -103,7 +105,7 @@ int mprint(t_philo *ph, int mod) {
   else if (mod == 5)
     printf("%li %i died\n", get_time(ph->da->start), ph->id);
 
-  pthread_mutex_unlock(ph->da->print);
+  pthread_mutex_unlock(&ph->da->print);
   return (0);
 }
 
@@ -143,8 +145,12 @@ int eating(t_philo *ph) {
   mprint(ph, 1);
   if (ph->rip == 1)
     return (0);
-
-  pthread_mutex_lock(&ph->da->forks[ph->rFork]);
+  if (ph->da->nb_philo > 1)
+    pthread_mutex_lock(&ph->da->forks[ph->rFork]);
+  else {
+    ph->rip = 1;
+    mprint(ph, 5);
+  } // printf("ici"); // usleep(ph->da->time_die * 500);
   mprint(ph, 1);
   mprint(ph, 2);
   usleep(ph->da->time_eat);
@@ -176,7 +182,7 @@ void *phi_loop(void *philo) {
       if (ph->rip == 1)
         break;
     }
-  } else if (ph->id == -2) {
+  } else if (ph->id == -2 && ph->da->nb_philo > 1) {
     while (ph->rip == 0 && ph->nb_meals > 0) {
       big_brother(ph);
       usleep(500);

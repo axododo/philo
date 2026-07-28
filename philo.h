@@ -14,7 +14,7 @@ typedef struct s_data {
   int time_sleep;
   int nb_goal;
   pthread_mutex_t *forks;
-  pthread_mutex_t *print;
+  pthread_mutex_t print;
   struct s_philo *ph;
 } t_data;
 
