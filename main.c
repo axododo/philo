@@ -113,6 +113,7 @@ int big_brother(t_philo *ph) {
   long dif, now;
   int i;
 
+  pthread_mutex_lock(&ph->da->print);
   i = 0;
   while (i < ph->da->nb_philo) {
     now = get_time(ph->da->start);
@@ -134,6 +135,7 @@ int big_brother(t_philo *ph) {
       i++;
     }
   }
+  pthread_mutex_unlock(&ph->da->print);
   return (1);
 }
 
@@ -154,8 +156,10 @@ int eating(t_philo *ph) {
   mprint(ph, 1);
   mprint(ph, 2);
   usleep(ph->da->time_eat);
+  pthread_mutex_lock(&ph->da->print);
   ph->last_meals = get_time(ph->da->start);
   ph->nb_meals++;
+  pthread_mutex_unlock(&ph->da->print);
   pthread_mutex_unlock(&ph->da->forks[ph->rFork]);
   pthread_mutex_unlock(&ph->da->forks[ph->lFork]);
   return (0);
@@ -207,6 +211,18 @@ int summon_philo(t_philo *ph, t_data *da) {
   return (0);
 }
 
+void clean_all(t_data *da) {
+  int i;
+
+  i = 0;
+  while (i < da->nb_philo + 1) {
+    pthread_mutex_destroy(&da->forks[i++]);
+  }
+  pthread_mutex_destroy(&da->print);
+  free(da->ph);
+  free(da->forks);
+}
+
 int main(int ac, char **av) {
   t_data da;
   t_philo *ph;
@@ -216,6 +232,6 @@ int main(int ac, char **av) {
   init_philo(&da);
   ph = da.ph;
   summon_philo(ph, &da);
-  // clean
+  clean_all(&da);
   return (0);
 }
