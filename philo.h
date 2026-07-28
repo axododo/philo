@@ -7,19 +7,21 @@
 #include <unistd.h>
 
 typedef struct s_data {
+  struct timeval start;
   int nb_philo;
   int time_die;
   int time_eat;
   int time_sleep;
   int nb_goal;
   pthread_mutex_t *forks;
+  pthread_mutex_t *print;
   struct s_philo *ph;
 } t_data;
 
 typedef struct s_philo {
   int id;
   int nb_meals;
-  int last_meals; // time last
+  long last_meals;
   int rip;
   int rFork;
   int lFork;
