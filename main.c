@@ -84,6 +84,7 @@ void init_philo(t_data *da) {
   }
   da->ph[i].id = -2;
   da->ph[i].da = da;
+  da->ph[i].nb_meals = da->nb_philo;
   return;
 }
 
@@ -115,11 +116,13 @@ int big_brother(t_philo *ph) {
     now = get_time(ph->da->start);
     dif = now - ph->da->ph[i].last_meals;
 
-    if (dif > ph->da->time_die) {
+    if (dif > ph->da->time_die && ph->da->ph[i].nb_meals != ph->da->nb_goal) {
       mprint(&ph->da->ph[i], 5);
       ph->rip = 1;
       break;
     }
+    if (ph->da->ph[i].nb_meals == ph->da->nb_goal)
+      ph->nb_meals--;
     i++;
   }
   if (ph->rip) {
@@ -146,6 +149,7 @@ int eating(t_philo *ph) {
   mprint(ph, 2);
   usleep(ph->da->time_eat);
   ph->last_meals = get_time(ph->da->start);
+  ph->nb_meals++;
   pthread_mutex_unlock(&ph->da->forks[ph->rFork]);
   pthread_mutex_unlock(&ph->da->forks[ph->lFork]);
   return (0);
@@ -163,6 +167,8 @@ void *phi_loop(void *philo) {
       mprint(ph, 3);
       // usleep(500 * 1000);
       eating(ph);
+      if (ph->nb_meals == ph->da->nb_goal)
+        break;
       if (ph->rip == 1)
         break;
       mprint(ph, 4);
@@ -171,7 +177,7 @@ void *phi_loop(void *philo) {
         break;
     }
   } else if (ph->id == -2) {
-    while (ph->rip == 0) {
+    while (ph->rip == 0 && ph->nb_meals > 0) {
       big_brother(ph);
       usleep(500);
     }
