@@ -79,8 +79,14 @@ void init_philo(t_data *da) {
     da->ph[i].id = i + 1;
     da->ph[i].rip = 0;
     da->ph[i].last_meals = get_time(da->start);
-    da->ph[i].rFork = i;
-    da->ph[i].lFork = (i + 1) % da->nb_philo;
+    if (da->ph[i].id % 2 == 0) {
+      da->ph[i].rFork = i;
+      da->ph[i].lFork = (i + 1) % da->nb_philo;
+    }
+    else {
+      da->ph[i].lFork = i;
+      da->ph[i].rFork = (i + 1) % da->nb_philo;
+    }
     da->ph[i].da = da;
     i++;
   }
@@ -142,11 +148,11 @@ int big_brother(t_philo *ph) {
 int eating(t_philo *ph) {
   if (ph->rip == 1)
     return (0);
-
   pthread_mutex_lock(&ph->da->forks[ph->lFork]);
   mprint(ph, 1);
   if (ph->rip == 1)
     return (0);
+  
   if (ph->da->nb_philo > 1)
     pthread_mutex_lock(&ph->da->forks[ph->rFork]);
   else {
@@ -168,7 +174,7 @@ int eating(t_philo *ph) {
 void *phi_loop(void *philo) {
   t_philo *ph;
   ph = philo;
-  if (ph->id % 2 == 0)
+  if (ph->id % 2 == 1)
     usleep(1000);
   if (ph->id > 0) {
     while (1) {
@@ -203,6 +209,7 @@ int summon_philo(t_philo *ph, t_data *da) {
     pthread_create(&ph[i].stone, NULL, &phi_loop, &ph[i]);
     i++;
   }
+  printf("\nexit\n");
   i = 0;
   while (i < da->nb_philo + 1) {
     pthread_join(ph[i].stone, NULL);
