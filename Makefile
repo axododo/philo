@@ -1,10 +1,12 @@
-NAME = philo
+NAME = philos
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
 
-SRCS = main.c \
-			 res.c \
+SRCS = philo/main.c \
+			 philo/res.c \
+				philo/parsing.c  \
+				philo/philo.c
 
 
 OBJS = $(SRCS:.c=.o)
