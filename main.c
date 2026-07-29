@@ -35,7 +35,7 @@ int big_brother(t_philo *ph) {
   long dif, now;
   int i;
 
-  pthread_mutex_lock(&ph->da->print);
+  pthread_mutex_lock(&ph->da->stop);
   i = 0;
   while (i < ph->da->nb_philo) {
     now = get_time(ph->da->start);
@@ -57,7 +57,7 @@ int big_brother(t_philo *ph) {
       i++;
     }
   }
-  pthread_mutex_unlock(&ph->da->print);
+  pthread_mutex_unlock(&ph->da->stop);
   return (1);
 }
 

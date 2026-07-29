@@ -1,4 +1,5 @@
 #include "philo.h"
+#include <pthread.h>
 
 int check_args(char **av) {
   int i;
@@ -61,6 +62,7 @@ int procs_args(char **av, t_data *da) {
     i++;
   }
   pthread_mutex_init(&da->print, NULL);
+  pthread_mutex_init(&da->stop, NULL);
   if (!da->ph)
     return (1);
   return (0);
