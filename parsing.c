@@ -61,7 +61,6 @@ void	init_mutex(t_data *da)
 int	procs_args(char **av, t_data *da)
 {
 	struct timeval	tv;
-	int				i;
 
 	gettimeofday(&tv, NULL);
 	da->start = tv;

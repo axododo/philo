@@ -48,8 +48,6 @@ void	bb_watching(t_philo *ph)
 int	big_brother(t_philo *ph)
 {
 	int		i;
-	long	dif;
-	long	now;
 
 	pthread_mutex_lock(&ph->da->stop);
 	i = 0;
