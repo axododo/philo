@@ -27,8 +27,8 @@ typedef struct s_philo
 	int				nb_meals;
 	long			last_meals;
 	int				rip;
-	int				rFork;
-	int				lFork;
+	int				rfork;
+	int				lfork;
 	pthread_t		stone;
 	struct s_data	*da;
 }					t_philo;

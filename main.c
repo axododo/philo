@@ -1,19 +1,7 @@
 #include "philo.h"
 #include <pthread.h>
-#include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
-
-long	get_time(struct timeval start)
-{
-	struct timeval	now;
-
-	gettimeofday(&now, NULL);
-	long result =
-		(now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec - start.tv_usec)
-			/ 1000;
-	return (result);
-}
 
 int	mprint(t_philo *ph, int mod)
 {
@@ -34,13 +22,12 @@ int	mprint(t_philo *ph, int mod)
 	return (0);
 }
 
-int	big_brother(t_philo *ph)
+void	bb_watching(t_philo *ph)
 {
-	int	i;
-	long	dif; 
+	int		i;
 	long	now;
-	
-	pthread_mutex_lock(&ph->da->stop);
+	long	dif;
+
 	i = 0;
 	while (i < ph->da->nb_philo)
 	{
@@ -56,6 +43,17 @@ int	big_brother(t_philo *ph)
 			ph->nb_meals--;
 		i++;
 	}
+}
+
+int	big_brother(t_philo *ph)
+{
+	int		i;
+	long	dif;
+	long	now;
+
+	pthread_mutex_lock(&ph->da->stop);
+	i = 0;
+	bb_watching(ph);
 	if (ph->rip)
 	{
 		i = 0;
@@ -69,18 +67,23 @@ int	big_brother(t_philo *ph)
 	return (1);
 }
 
-void	clean_all(t_data *da)
+int	summon_philo(t_philo *ph, t_data *da)
 {
 	int	i;
 
 	i = 0;
 	while (i < da->nb_philo + 1)
 	{
-		pthread_mutex_destroy(&da->forks[i++]);
+		pthread_create(&ph[i].stone, NULL, &phi_loop, &ph[i]);
+		i++;
 	}
-	pthread_mutex_destroy(&da->print);
-	free(da->ph);
-	free(da->forks);
+	i = 0;
+	while (i < da->nb_philo + 1)
+	{
+		pthread_join(ph[i].stone, NULL);
+		i++;
+	}
+	return (0);
 }
 
 int	main(int ac, char **av)

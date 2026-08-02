@@ -33,8 +33,8 @@ void	init_philo(t_data *da)
 		da->ph[i].id = i + 1;
 		da->ph[i].rip = 0;
 		da->ph[i].last_meals = get_time(da->start);
-		da->ph[i].lFork = i;
-		da->ph[i].rFork = (i + 1) % da->nb_philo;
+		da->ph[i].lfork = i;
+		da->ph[i].rfork = (i + 1) % da->nb_philo;
 		da->ph[i].da = da;
 		i++;
 	}
@@ -42,6 +42,20 @@ void	init_philo(t_data *da)
 	da->ph[i].da = da;
 	da->ph[i].nb_meals = da->nb_philo;
 	return ;
+}
+
+void	init_mutex(t_data *da)
+{
+	int	i;
+
+	i = 0;
+	while (i < da->nb_philo + 1)
+	{
+		pthread_mutex_init(&da->forks[i], NULL);
+		i++;
+	}
+	pthread_mutex_init(&da->print, NULL);
+	pthread_mutex_init(&da->stop, NULL);
 }
 
 int	procs_args(char **av, t_data *da)
@@ -61,15 +75,7 @@ int	procs_args(char **av, t_data *da)
 		da->nb_goal = -1;
 	da->ph = calloc(da->nb_philo + 2, sizeof(t_philo));
 	da->forks = calloc(da->nb_philo + 2, sizeof(pthread_mutex_t));
-	// da->print = calloc(1, sizeof(pthread_mutex_t));
-	i = 0;
-	while (i < da->nb_philo + 1)
-	{
-		pthread_mutex_init(&da->forks[i], NULL);
-		i++;
-	}
-	pthread_mutex_init(&da->print, NULL);
-	pthread_mutex_init(&da->stop, NULL);
+	init_mutex(da);
 	if (!da->ph)
 		return (1);
 	return (0);

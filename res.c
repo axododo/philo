@@ -1,5 +1,30 @@
 #include "philo.h"
 
+long	get_time(struct timeval start)
+{
+	struct timeval	now;
+	long			result;
+
+	gettimeofday(&now, NULL);
+	result = (now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec - start.tv_usec)
+		/ 1000;
+	return (result);
+}
+
+void	clean_all(t_data *da)
+{
+	int	i;
+
+	i = 0;
+	while (i < da->nb_philo + 1)
+	{
+		pthread_mutex_destroy(&da->forks[i++]);
+	}
+	pthread_mutex_destroy(&da->print);
+	free(da->ph);
+	free(da->forks);
+}
+
 int	ft_atoi(const char *nptr)
 {
 	int	i;
